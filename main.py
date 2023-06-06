@@ -1,75 +1,101 @@
-from sklearn.cluster import KMeans
-from scipy.stats import norm
-
+import csv
 import matplotlib.pyplot as plt
-import numpy as np
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Generacja trzech zbiorów punktów, które zostają połączone,
-# a następnie przy pomocy KMeans podzielone na klastry
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# Środki klastrów w przestrzeni 2D
-mns = [(5, 3), (15, 4), (10, 8)]
-
-# Odchylenia standardowe
-scales = [(2, 1), (1, 1), (1, 2)]
-
-params = zip(mns, scales)  # Parametry zagregowane w celu uproszczenia iteracji
+from sklearn.cluster import KMeans
+from fun import *
 
 clusters = []
+# Zaimportowanie wygenerowanych chmur
+def cloud_reader1():
+    with open('PlaskaPozioma.xyz', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for x, y, z in reader:
+            yield (float(x), float(y), float(z))
 
-# Generacja punktow i połączenie ich w jedną listę
-for parset in params:
-    dist_x = norm(loc=parset[0][0], scale=parset[1][0])
-    dist_y = norm(loc=parset[0][1], scale=parset[1][1])
-    cluster_x = dist_x.rvs(size=100)
-    cluster_y = dist_y.rvs(size=100)
-    cluster = zip(cluster_x, cluster_y)
-    clusters.extend(cluster)
+def cloud_reader2():
+    with open('PlaskaPionowa.xyz', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for x, y, z in reader:
+            yield (float(x), float(y), float(z))
+def cloud_reader3():
+    with open('Walec.xyz', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for x, y, z in reader:
+            yield (float(x), float(y), float(z))
 
-    # append dodaje kolejny pojedynczy element (wartość, listę...)
-    # extend dodajne kolejne elementy (np. umieszczone w liście)
-    # W efekcie, w clusters znajduje lista punktów, a nie klastrów
+# Połączenie chmur w jedną
+for p in cloud_reader1():
+    clusters.append(p)
+for p in cloud_reader2():
+    clusters.append(p)
+for p in cloud_reader3():
+    clusters.append(p)
 
-# Wydzielenie współrzędnych x i y do osobnych list ("rozpakowanie")
-x, y = zip(*clusters)
+x, y, z = zip(*clusters) # wydzielenie współrzędnych punktów do osobnych list
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+ax.scatter(x, y, z, s = 1)  #Rysowanie wykresu punktowego
+plt.title('Points scattering in 3D')
+ax.set_xlabel('x', fontsize = 14)
+ax.set_ylabel('y', fontsize = 14)
+ax.set_zlabel('z', fontsize = 14)
+ax.axis('equal')
 
-#plt.figure()
-plt.scatter(x, y)  #Rysowanie wykresu punktowego
-plt.title('Points scattering in 2D')
-#plt.tight_layout()
-plt.xlabel('x', fontsize = 14)
-plt.ylabel('y', fontsize = 14)
 
+clusterer = KMeans(n_clusters=3, n_init=10)  # Konstruktor; n_init - licza iteracji
+X = np.array(clusters) # utworzenie tablicy krotek będących współrzędnymi kolejnych punktów
 
-clusterer = KMeans(n_clusters=3)
-# 1) Wyznaczane są centra (tyle ile wynosi n_clusters)
-# 2) Obliczane są odległości wszystkich punktów do centrów
-# 3) Następuje przypisanie punktów do klastrów, w zależności od tego,
-#    które centrum znajduje się najbliżej
-# 4) Liczona jest średnia współrzędnych x i y wszystkich punktów w danych klastrach
-#    i w ten sposób zostają wyznaczone nowe centra klastrów
-# Powrót do punktu 2)
-#
-# Kolejne iteracje następują do spełnienia określonego warunku, np. liczby iteracji lub braku zmiany położenia centrów
+y_pred = clusterer.fit_predict(X) # Klasteryzacja przez wpisanie 0/1/2 na pozycjach poszczególnych punktów
 
-# Domyślnie KMeans wykonuje się 8-krotnie, a tolerancja...
-
-# Przekształcenie listy krotek na tablicę 2D
-X = np.array(clusters)
-
-# Dopasowanie do danych (fit; "nauczenie" - znalezienie reguł)
-# i przewidzenie etykiet dla każdego punktu (etykiety to liczby naturalne).
-y_pred = clusterer.fit_predict(X)
-
-# Utworzenie list z wartościami false/true, w zależności od etykiety przypisanej danemu punktowi
+# Wektory oznaczające czy na danej pozycji znajduje się punkt należący do określonego klastra
 red = y_pred == 0
 blue = y_pred == 1
 cyan = y_pred == 2
 
-plt.figure()
-plt.scatter(X[red, 0], X[red, 1], c="r")
-plt.scatter(X[blue, 0],X[blue, 1], c="b")
-plt.scatter(X[cyan, 0], X[cyan, 1], c="c")
+fig2 = plt.figure()
+f2 = fig2.add_subplot(projection='3d')
+f2.scatter(X[red, 0], X[red, 1], X[red, 2], c="r", s = 1)
+f2.scatter(X[blue, 0], X[blue, 1], X[blue, 2], c="b", s = 1)
+f2.scatter(X[cyan, 0], X[cyan, 1], X[cyan, 2], c="c", s = 1)
+plt.title('Points scattering in 3D')
+f2.set_xlabel('x', fontsize = 14)
+f2.set_ylabel('y', fontsize = 14)
+f2.set_zlabel('z', fontsize = 14)
+f2.axis('equal')
 plt.show()
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# RANSAC - RANdom SAmple Consensus
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+ransac(X[red])
+ransac(X[blue])
+ransac(X[cyan])
+
+# thresh = 1  # warunek dla inlierów
+
+# # 2) Sprawdzenie jak dobrze wszystkie punkty z chmury pasują do wyznaczonej płaszczyzny
+# # 2.1) Należy określić warunek dobrego dopasowania - maksymalną odległość od płaszczyzny
+# # 2.2) Należy wyznaczyć grupę inlierów i obliczyć ich liczbę
+# #
+# #      Jeśli liczba inlierów jest największa z dotychczasowych, to zapamiętaj bieżący model jako najlepszy
+#
+# # Obliczanie odległości punktów od modelu (płaszczyzny)
+#
+
+
+# # Alternatywa dla licznika
+# # wx * points[:, 0] + wy * points[:, 1] + ...
+#
+# inliers = np.where(np.abs(distance_all_points) <= thresh)[0]  # Wykorzystywany jest zerowy element z wartości zwracanych przez np.where
+#
+# model_size = len(inliers)
+#
+# # 3) Jeśli osiągnięto maksymalną liczbę iteracji, przejdź do 4)
+# #    W przeciwnym przypadku powrót do punktu 1)
+#
+# # Można też założyć minimalną liczbę oczekiwanych inlierów
+#
+# # 4) Dla inlierów z najlepszej grupy oszacuj dokładniejszy model
+# #    (np. przy pomocy najmniejszych kwadratów)
+#
+#
