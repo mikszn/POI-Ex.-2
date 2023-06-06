@@ -68,3 +68,98 @@ ransac(X[blue])
 ransac(X[cyan])
 
 plt.show()
+
+
+
+
+import pyransac3d as pyrsc
+
+# Zaimportowanie pliku csv
+def room_reader():
+    with open('conferenceRoom_1.txt', newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=' ')
+        for x, y, z, xx, yy, zz in reader:  # Każde wejście do pętli powoduje wywołanie next(reader)
+            yield (float(x), float(y), float(z))
+
+room = []
+for r in room_reader():
+    room.append(r)
+
+points = np.asarray(room) # przekonwertowanie tablicy z krotkami na macierz
+
+
+plane = pyrsc.Plane()
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane1_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane1_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane2_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane2_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane3_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane3_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane4_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane4_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane5_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane5_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+best_eq, best_inliers = plane.fit(points, 0.02)
+plane6_points = np.zeros((len(best_inliers),3))
+j = 0
+for i in best_inliers:
+    plane6_points[j] = points[i]
+    j += 1
+points = np.delete(points, best_inliers, 0)
+
+# Zapisanie chmur do plików
+with open('cloud1.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane1_points:
+        csvwriter.writerow(p)
+with open('cloud2.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane2_points:
+        csvwriter.writerow(p)
+with open('cloud3.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane3_points:
+        csvwriter.writerow(p)
+with open('cloud4.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane4_points:
+        csvwriter.writerow(p)
+with open('cloud5.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane5_points:
+        csvwriter.writerow(p)
+with open('cloud6.xyz', 'w', encoding='utf-8', newline='\n') as csvfile:
+    csvwriter = csv.writer(csvfile)
+    for p in plane6_points:
+        csvwriter.writerow(p)
