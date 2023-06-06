@@ -22,17 +22,16 @@ def ransac(points, maxIter: int = 10):
         if np.linalg.norm(vA) == 0 or np.linalg.norm(vB) == 0:
             print("ERROR")
             break
-
         uA = vA / np.linalg.norm(vA)
         uB = vB / np.linalg.norm(vB)
 
         w = np.cross(uA, uB)  # wektor W (normalny do płaszczyzny)
         d = -np.sum(np.multiply(w, randPts[2]))  # odległość od początku układu wspólrzędnych
 
-        distance_all_points_coordinates = (np.multiply(w, points) + d) / np.linalg.norm(w) # odleglosci dla kazdej wspolrzednej osobnp
-        distance_all_points = np.zeros(len(distance_all_points_coordinates))
-        for i in range(0, len(distance_all_points_coordinates)):
-            distance_all_points[i] = np.sqrt(distance_all_points_coordinates[i,0]**2 + distance_all_points_coordinates[i,1]**2 + distance_all_points_coordinates[i,2]**2)
+        distance_all_points = np.zeros(len(points))
+        for i in range(0, len(points)):
+            distance_all_points[i] = (np.sum(np.multiply(w,points[i])) + d) / np.linalg.norm(w)
+
         thresh = 3
         inliers = np.where(np.abs(distance_all_points) <= thresh)[0]  # Zwraca elementy dla których spełniony jest warunek (inlierów)
         modelSize[iter-1] = len(inliers) # liczba inlierów
@@ -41,7 +40,7 @@ def ransac(points, maxIter: int = 10):
         iter += 1
         if iter > maxIter or modelSize[iter-2] == len(points): # przerwanie jeśli wykonano maksymalna liczbe iteracji lub gdy wszystkie punkty to inliery
 
-            bestModelIndex = np.array(modelSize).argmax()
+            bestModelIndex = np.array(modelSize).argmax()      # Analiza dla najlepszego przypadku ze wszystkich iteracji
             a = modelPoints[bestModelIndex][0]
             b = modelPoints[bestModelIndex][1]
             c = modelPoints[bestModelIndex][2]
@@ -51,22 +50,20 @@ def ransac(points, maxIter: int = 10):
             if np.linalg.norm(vA) == 0 or np.linalg.norm(vB) == 0:
                 print("ERROR")
                 break
-
             uA = vA / np.linalg.norm(vA)
             uB = vB / np.linalg.norm(vB)
 
             w = np.cross(uA, uB)  # wektor W (normalny do płaszczyzny)
             d = -np.sum(np.multiply(w, c))  # odległość od początku układu wspólrzędnych
 
-            distance_all_points_coordinates = (np.multiply(w, points) + d) / np.linalg.norm(w)
-            distance_all_points = np.zeros(len(distance_all_points_coordinates))
-            for i in range(0, len(distance_all_points_coordinates)):
-                distance_all_points[i] = np.sqrt(distance_all_points_coordinates[i, 0] ** 2 + distance_all_points_coordinates[i, 1] ** 2 + distance_all_points_coordinates[i, 2] ** 2)
+            distance_all_points = np.zeros(len(points))
+            for i in range(0, len(points)):
+                distance_all_points[i] = (np.sum(np.multiply(w, points[i])) + d) / np.linalg.norm(w)
 
             print("Wektor normalny:", w)
             distance_all_points_sum = np.sum(abs(distance_all_points))
             if distance_all_points_sum < 1:
-                print("Płaszczyzna ", end="")
+                print("Plaszczyzna ", end="")
                 if w[2] == 0:  # z == 0
                     print("pionowa.")
                 elif w[0] == 0 and w[1] == 0:  # x == 0 i y == 0
@@ -74,5 +71,5 @@ def ransac(points, maxIter: int = 10):
                 else:
                     print("[bład]")
             else:
-                print("To nie jest płaszczyzna.")
+                print("To nie jest plaszczyzna.")
             break

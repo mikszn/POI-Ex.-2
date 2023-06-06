@@ -61,41 +61,10 @@ f2.set_xlabel('x', fontsize = 14)
 f2.set_ylabel('y', fontsize = 14)
 f2.set_zlabel('z', fontsize = 14)
 f2.axis('equal')
-plt.show()
 
-# # # # # # # # # # # # # # # # # # # # # # # # #
-# RANSAC - RANdom SAmple Consensus
-# # # # # # # # # # # # # # # # # # # # # # # # #
 
 ransac(X[red])
 ransac(X[blue])
 ransac(X[cyan])
 
-# thresh = 1  # warunek dla inlierów
-
-# # 2) Sprawdzenie jak dobrze wszystkie punkty z chmury pasują do wyznaczonej płaszczyzny
-# # 2.1) Należy określić warunek dobrego dopasowania - maksymalną odległość od płaszczyzny
-# # 2.2) Należy wyznaczyć grupę inlierów i obliczyć ich liczbę
-# #
-# #      Jeśli liczba inlierów jest największa z dotychczasowych, to zapamiętaj bieżący model jako najlepszy
-#
-# # Obliczanie odległości punktów od modelu (płaszczyzny)
-#
-
-
-# # Alternatywa dla licznika
-# # wx * points[:, 0] + wy * points[:, 1] + ...
-#
-# inliers = np.where(np.abs(distance_all_points) <= thresh)[0]  # Wykorzystywany jest zerowy element z wartości zwracanych przez np.where
-#
-# model_size = len(inliers)
-#
-# # 3) Jeśli osiągnięto maksymalną liczbę iteracji, przejdź do 4)
-# #    W przeciwnym przypadku powrót do punktu 1)
-#
-# # Można też założyć minimalną liczbę oczekiwanych inlierów
-#
-# # 4) Dla inlierów z najlepszej grupy oszacuj dokładniejszy model
-# #    (np. przy pomocy najmniejszych kwadratów)
-#
-#
+plt.show()
